@@ -1,0 +1,18 @@
+{
+  "autoConvert": true,
+  "datePairs": [
+    {
+      "source": "Watched on start",
+      "target": "Shamsi start"
+    },
+    {
+      "source": "Watched on end",
+      "target": "Shamsi end"
+    },
+    {
+      "source": "date",
+      "target": "shamsi"
+    }
+  ],
+  "dateFormat": "YYYY-MM-DD"
+}

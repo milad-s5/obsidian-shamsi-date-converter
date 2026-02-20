@@ -1,0 +1,8 @@
+.shamsi-date-converter-setting {
+    padding: 10px 0;
+}
+
+.shamsi-date-converter-setting .setting-item-description {
+    color: var(--text-muted);
+    font-size: 0.9em;
+}
