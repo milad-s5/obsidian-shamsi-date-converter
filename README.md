@@ -2,6 +2,8 @@
 
 Automatically convert Gregorian dates to Shamsi (Jalali/Persian) dates in your Obsidian notes. Perfect for tracking movie watch dates, reading logs, or any time-based records with both start and end dates!
 
+![Shamsi Date Converter in action](images/demo.png)
+
 ## Features
 
 - **✨ Multiple Date Pairs**: Support for start/end dates or any custom date property pairs
