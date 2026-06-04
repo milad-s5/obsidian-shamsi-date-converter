@@ -188,10 +188,10 @@ git push origin main
 
 ```bash
 # Create annotated tag with release notes
-git tag -a v1.1.0 -m "Release v1.1.0 - TypeScript refactoring & full CI/CD"
+git tag -a 1.1.0 -m "Release v1.1.0 - TypeScript refactoring & full CI/CD"
 
 # Push tag to GitHub (THIS TRIGGERS GITHUB ACTIONS)
-git push origin v1.1.0
+git push origin 1.1.0
 ```
 
 ⚠️ **IMPORTANT:** Pushing the tag (`git push origin v1.1.0`) automatically triggers the GitHub Actions release workflow!
