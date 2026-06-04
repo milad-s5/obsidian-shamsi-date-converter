@@ -4,7 +4,6 @@
 
 import { App, PluginSettingTab, Setting } from 'obsidian';
 import ShamsiDateConverterPlugin from './main';
-import { ShamsiDateConverterSettings, DatePairMapping } from './PluginSettings';
 
 export class ShamsiDateSettingTab extends PluginSettingTab {
     plugin: ShamsiDateConverterPlugin;

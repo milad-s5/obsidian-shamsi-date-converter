@@ -3,7 +3,7 @@
  */
 
 import { DateConverter } from './DateConverter';
-import { ShamsiDateConverterSettings, DatePairMapping } from './PluginSettings';
+import { ShamsiDateConverterSettings } from './PluginSettings';
 
 export interface DatePairUpdate {
     needsUpdate: boolean;
