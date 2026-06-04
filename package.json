@@ -1,0 +1,32 @@
+{
+  "name": "obsidian-shamsi-date-converter",
+  "version": "1.0.0",
+  "description": "Obsidian plugin to convert Gregorian dates to Shamsi (Jalali/Persian) dates",
+  "main": "dist/main.js",
+  "types": "dist/main.d.ts",
+  "scripts": {
+    "dev": "node esbuild.config.mjs",
+    "build": "tsc -noEmit && node esbuild.config.mjs production",
+    "lint": "eslint . --ext .ts",
+    "test": "jest"
+  },
+  "keywords": [
+    "obsidian",
+    "shamsi",
+    "jalali",
+    "persian",
+    "date",
+    "converter"
+  ],
+  "author": "Milad Samimifar",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^16.11.6",
+    "@typescript-eslint/eslint-plugin": "5.2.0",
+    "@typescript-eslint/parser": "5.2.0",
+    "esbuild": "0.13.12",
+    "obsidian": "latest",
+    "tslib": "2.4.0",
+    "typescript": "4.7.4"
+  }
+}
