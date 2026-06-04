@@ -15,7 +15,7 @@ export class DateConverter {
      * @returns ShamsiDate object with year, month, and day
      */
     static gregorianToShamsi(gregorianDate: Date): ShamsiDate {
-        const gy = gregorianDate.getFullYear();
+        let gy = gregorianDate.getFullYear();
         const gm = gregorianDate.getMonth() + 1;
         const gd = gregorianDate.getDate();
 

@@ -9,7 +9,7 @@ import { FileProcessor } from './FileProcessor';
 import { ShamsiDateSettingTab } from './SettingsUI';
 
 export default class ShamsiDateConverterPlugin extends Plugin {
-    settings: ShamsiDateConverterSettings;
+    settings: ShamsiDateConverterSettings = DEFAULT_SETTINGS;
 
     async onload(): Promise<void> {
         console.log('Loading Shamsi Date Converter Plugin');
