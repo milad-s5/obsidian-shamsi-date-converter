@@ -35,20 +35,20 @@ jobs:
       - name: Build project
         run: npm run build
 
-      - name: Verify tag format and manifest version
+      - name: Verify manifest version matches tag (accept v-prefixed or plain)
         run: |
           TAG_VERSION=${{ steps.version.outputs.VERSION }}
-          if [[ "$TAG_VERSION" != v* ]]; then
-            echo "❌ Tag '$TAG_VERSION' must start with 'v' (e.g., v1.1.0)"
-            exit 1
+          if [[ "$TAG_VERSION" == v* ]]; then
+            STRIPPED_TAG_VERSION=${TAG_VERSION#v}
+          else
+            STRIPPED_TAG_VERSION=$TAG_VERSION
           fi
           MANIFEST_VERSION=$(jq -r '.version' manifest.json)
-          STRIPPED_TAG_VERSION=${TAG_VERSION#v}
           if [ "$MANIFEST_VERSION" != "$STRIPPED_TAG_VERSION" ]; then
             echo "❌ manifest.json version ($MANIFEST_VERSION) does not match tag ($TAG_VERSION)"
             exit 1
           fi
-          echo "✅ Version match: $MANIFEST_VERSION"
+          echo "✅ Version match: $MANIFEST_VERSION (from tag $TAG_VERSION)"
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
