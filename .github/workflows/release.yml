@@ -39,7 +39,8 @@ jobs:
         run: |
           MANIFEST_VERSION=$(jq -r '.version' manifest.json)
           TAG_VERSION=${{ steps.version.outputs.VERSION }}
-          if [ "$MANIFEST_VERSION" != "$TAG_VERSION" ]; then
+          STRIPPED_TAG_VERSION=${TAG_VERSION#v}
+          if [ "$MANIFEST_VERSION" != "$STRIPPED_TAG_VERSION" ]; then
             echo "❌ manifest.json version ($MANIFEST_VERSION) does not match tag ($TAG_VERSION)"
             exit 1
           fi
