@@ -35,10 +35,14 @@ jobs:
       - name: Build project
         run: npm run build
 
-      - name: Verify manifest version matches tag
+      - name: Verify tag format and manifest version
         run: |
-          MANIFEST_VERSION=$(jq -r '.version' manifest.json)
           TAG_VERSION=${{ steps.version.outputs.VERSION }}
+          if [[ "$TAG_VERSION" != v* ]]; then
+            echo "❌ Tag '$TAG_VERSION' must start with 'v' (e.g., v1.1.0)"
+            exit 1
+          fi
+          MANIFEST_VERSION=$(jq -r '.version' manifest.json)
           STRIPPED_TAG_VERSION=${TAG_VERSION#v}
           if [ "$MANIFEST_VERSION" != "$STRIPPED_TAG_VERSION" ]; then
             echo "❌ manifest.json version ($MANIFEST_VERSION) does not match tag ($TAG_VERSION)"
