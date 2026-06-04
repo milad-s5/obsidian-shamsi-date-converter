@@ -1,7 +1,3 @@
-/**
- * SettingsUI - Handles the plugin settings tab UI
- */
-
 import { App, PluginSettingTab, Setting } from 'obsidian';
 import ShamsiDateConverterPlugin from './main';
 

@@ -1,7 +1,3 @@
-/**
- * PluginSettings - Manages plugin settings structure and defaults
- */
-
 export interface DatePairMapping {
     source: string;
     target: string;

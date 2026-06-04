@@ -1,7 +1,3 @@
-/**
- * Unit tests for FileProcessor module
- */
-
 import { FileProcessor } from '../FileProcessor';
 import { ShamsiDateConverterSettings } from '../PluginSettings';
 

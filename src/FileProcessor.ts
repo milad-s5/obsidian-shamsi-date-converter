@@ -1,7 +1,3 @@
-/**
- * FileProcessor - Handles reading, parsing, and updating markdown files
- */
-
 import { DateConverter } from './DateConverter';
 import { ShamsiDateConverterSettings } from './PluginSettings';
 
@@ -14,12 +10,6 @@ export interface DatePairUpdate {
 }
 
 export class FileProcessor {
-    /**
-     * Processes a markdown file and converts dates according to settings
-     * @param content - The file content
-     * @param settings - The plugin settings
-     * @returns Updated content or null if no changes needed
-     */
     static processFrontmatter(content: string, settings: ShamsiDateConverterSettings): string | null {
         if (!content.startsWith('---\n')) {
             return null;
@@ -33,8 +23,6 @@ export class FileProcessor {
         }
 
         const frontmatter = match[1];
-
-        // Check if frontmatter has any relevant properties
         const hasRelevantProperty = settings.datePairs.some(pair =>
             frontmatter.includes(`${pair.source}:`) || frontmatter.includes(`${pair.target}:`)
         );
@@ -47,7 +35,6 @@ export class FileProcessor {
         let needsUpdate = false;
         const updates: DatePairUpdate[] = [];
 
-        // Process each date pair mapping
         for (const pair of settings.datePairs) {
             const result = FileProcessor.procesDatePair(
                 lines,
@@ -66,7 +53,6 @@ export class FileProcessor {
             return null;
         }
 
-        // Apply updates from bottom to top to maintain correct line indices
         const sortedUpdates = updates.slice().sort((a, b) => {
             const aIndex = a.action === 'insert' ? a.insertAfter ?? -1 : a.targetLine ?? -1;
             const bIndex = b.action === 'insert' ? b.insertAfter ?? -1 : b.targetLine ?? -1;
@@ -85,9 +71,6 @@ export class FileProcessor {
         return content.replace(frontmatterRegex, `---\n${newFrontmatter}\n---`);
     }
 
-    /**
-     * Processes a date pair and returns update instructions
-     */
     static procesDatePair(
         lines: string[],
         sourceProperty: string,
@@ -98,7 +81,6 @@ export class FileProcessor {
         let sourcePropertyLine = -1;
         let targetPropertyLine = -1;
 
-        // Find source and target property lines
         for (let i = 0; i < lines.length; i++) {
             const line = lines[i];
 
@@ -151,12 +133,10 @@ export class FileProcessor {
             };
         }
 
-        // Convert Gregorian to Shamsi
         const shamsiDate = DateConverter.gregorianToShamsi(sourceDate);
         const shamsiString = DateConverter.formatShamsiDate(shamsiDate, dateFormat);
         const shamsiLine = `${targetProperty}: ${shamsiString}`;
 
-        // Return update instruction
         if (targetPropertyLine !== -1) {
             if (lines[targetPropertyLine] !== shamsiLine) {
                 return {

@@ -1,7 +1,3 @@
-/**
- * DateConverter - Handles Gregorian to Shamsi date conversion
- */
-
 export interface ShamsiDate {
     year: number;
     month: number;
@@ -9,18 +5,13 @@ export interface ShamsiDate {
 }
 
 export class DateConverter {
-    /**
-     * Converts a Gregorian date to Shamsi (Jalali) calendar
-     * @param gregorianDate - The Gregorian date to convert
-     * @returns ShamsiDate object with year, month, and day
-     */
     static gregorianToShamsi(gregorianDate: Date): ShamsiDate {
         let gy = gregorianDate.getFullYear();
         const gm = gregorianDate.getMonth() + 1;
         const gd = gregorianDate.getDate();
 
         const g_d_n = [0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334];
-        
+
         let jy: number;
         let gy2: number;
         let jm: number;
@@ -71,11 +62,6 @@ export class DateConverter {
         return { year: jy, month: jm, day: jd };
     }
 
-    /**
-     * Parses a date string to a Date object
-     * @param dateString - The date string to parse
-     * @returns Date object or null if parsing fails
-     */
     static parseDate(dateString: string): Date | null {
         const cleanedString = dateString.replace(/['"]/g, '').trim();
 
@@ -92,12 +78,6 @@ export class DateConverter {
         return date;
     }
 
-    /**
-     * Formats a Shamsi date according to the specified format
-     * @param shamsiDate - The Shamsi date to format
-     * @param format - The format string (e.g., 'YYYY/MM/DD')
-     * @returns Formatted date string
-     */
     static formatShamsiDate(shamsiDate: ShamsiDate, format: string): string {
         const { year, month, day } = shamsiDate;
         const paddedMonth = String(month).padStart(2, '0');

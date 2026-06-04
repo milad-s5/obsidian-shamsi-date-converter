@@ -1,7 +1,3 @@
-/**
- * Unit tests for DateConverter module
- */
-
 import { DateConverter, ShamsiDate } from '../DateConverter';
 
 describe('DateConverter', () => {
@@ -10,7 +6,7 @@ describe('DateConverter', () => {
             const date = DateConverter.parseDate('2025-09-30');
             expect(date).toBeInstanceOf(Date);
             expect(date?.getFullYear()).toBe(2025);
-            expect(date?.getMonth()).toBe(8); // 0-indexed
+            expect(date?.getMonth()).toBe(8);
             expect(date?.getDate()).toBe(30);
         });
 
@@ -45,8 +41,7 @@ describe('DateConverter', () => {
 
     describe('gregorianToShamsi', () => {
         it('should convert Gregorian dates to Shamsi correctly', () => {
-            // Test case: 2025-09-30 should be 1404/07/08
-            const gregorianDate = new Date(2025, 8, 30); // Month is 0-indexed
+            const gregorianDate = new Date(2025, 8, 30);
             const shamsiDate = DateConverter.gregorianToShamsi(gregorianDate);
 
             expect(shamsiDate.year).toBe(1404);
@@ -55,7 +50,6 @@ describe('DateConverter', () => {
         });
 
         it('should convert dates from different years', () => {
-            // Test: 2020-03-20 should be 1399/01/01
             const gregorianDate = new Date(2020, 2, 20);
             const shamsiDate = DateConverter.gregorianToShamsi(gregorianDate);
 
@@ -65,11 +59,9 @@ describe('DateConverter', () => {
         });
 
         it('should handle leap years correctly', () => {
-            // 2024 is a leap year
-            const gregorianDate = new Date(2024, 1, 29); // Feb 29
+            const gregorianDate = new Date(2024, 1, 29);
             const shamsiDate = DateConverter.gregorianToShamsi(gregorianDate);
 
-            // Should convert without errors
             expect(shamsiDate.year).toBeGreaterThan(0);
             expect(shamsiDate.month).toBeGreaterThan(0);
             expect(shamsiDate.day).toBeGreaterThan(0);

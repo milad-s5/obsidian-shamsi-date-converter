@@ -1,8 +1,3 @@
-/**
- * Shamsi Date Converter Plugin
- * Automatically converts Gregorian dates to Shamsi (Jalali/Persian) dates
- */
-
 import { Plugin, TFile } from 'obsidian';
 import { ShamsiDateConverterSettings, DEFAULT_SETTINGS } from './PluginSettings';
 import { FileProcessor } from './FileProcessor';
@@ -14,20 +9,15 @@ export default class ShamsiDateConverterPlugin extends Plugin {
     async onload(): Promise<void> {
         console.log('Loading Shamsi Date Converter Plugin');
 
-        // Load settings
         await this.loadSettings();
-
-        // Add settings tab
         this.addSettingTab(new ShamsiDateSettingTab(this.app, this));
 
-        // Register file modify event
         this.registerEvent(
             this.app.vault.on('modify', (file) => {
                 this.handleFileModify(file);
             })
         );
 
-        // Add command: Convert current file
         this.addCommand({
             id: 'convert-to-shamsi',
             name: 'Convert all date pairs to Shamsi',
@@ -44,23 +34,14 @@ export default class ShamsiDateConverterPlugin extends Plugin {
         console.log('Unloading Shamsi Date Converter Plugin');
     }
 
-    /**
-     * Loads settings from plugin data
-     */
     private async loadSettings(): Promise<void> {
         this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
     }
 
-    /**
-     * Saves current settings to plugin data
-     */
     async saveSettings(): Promise<void> {
         await this.saveData(this.settings);
     }
 
-    /**
-     * Handles file modification events
-     */
     private async handleFileModify(file: unknown): Promise<void> {
         if (!this.settings.autoConvert) return;
 
@@ -71,9 +52,6 @@ export default class ShamsiDateConverterPlugin extends Plugin {
         await this.convertDateInFile(file);
     }
 
-    /**
-     * Converts dates in a specific file
-     */
     private async convertDateInFile(file: TFile): Promise<void> {
         const content = await this.app.vault.read(file);
         const updatedContent = FileProcessor.processFrontmatter(content, this.settings);
