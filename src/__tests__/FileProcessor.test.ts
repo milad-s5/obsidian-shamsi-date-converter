@@ -74,6 +74,20 @@ rating: 8/10
             expect(result).toContain('Shamsi start: 1404/07/08');
         });
 
+        it('should clear stale target date when source is cleared', () => {
+            const content = `---
+Watched on start:
+Shamsi start: 1404/07/08
+---
+`;
+            const result = FileProcessor.processFrontmatter(content, mockSettings);
+
+            expect(result).not.toBeNull();
+            expect(result).toContain('Shamsi start:');
+            expect(result).not.toContain('Shamsi start: 1404/07/08');
+            expect(result).toContain('Watched on start:');
+        });
+
         it('should handle different date formats', () => {
             const content = `---
 Watched on start: 2025/09/30
@@ -87,7 +101,7 @@ Watched on start: 2025/09/30
     });
 
     describe('procesDatePair', () => {
-        it('should return needsUpdate false if source date not found', () => {
+        it('should return needsUpdate false if source date not found and target absent', () => {
             const lines = ['title: Movie', 'rating: 8'];
             const result = FileProcessor.procesDatePair(
                 lines,
@@ -97,6 +111,36 @@ Watched on start: 2025/09/30
             );
 
             expect(result.needsUpdate).toBe(false);
+        });
+
+        it('should return update action clearing value if source date is cleared and target exists', () => {
+            const lines = ['Watched on start:', 'Shamsi start: 1404/07/08'];
+            const result = FileProcessor.procesDatePair(
+                lines,
+                'Watched on start',
+                'Shamsi start',
+                'YYYY/MM/DD'
+            );
+
+            expect(result.needsUpdate).toBe(true);
+            expect(result.action).toBe('update');
+            expect(result.targetLine).toBe(1);
+            expect(result.newValue).toBe('Shamsi start:');
+        });
+
+        it('should return update action clearing value if source is missing and target exists', () => {
+            const lines = ['Shamsi start: 1404/07/08'];
+            const result = FileProcessor.procesDatePair(
+                lines,
+                'Watched on start',
+                'Shamsi start',
+                'YYYY/MM/DD'
+            );
+
+            expect(result.needsUpdate).toBe(true);
+            expect(result.action).toBe('update');
+            expect(result.targetLine).toBe(0);
+            expect(result.newValue).toBe('Shamsi start:');
         });
 
         it('should return insert action if target does not exist', () => {
@@ -145,7 +189,7 @@ Watched on start: 2025/09/30
             expect(result.needsUpdate).toBe(false);
         });
 
-        it('should handle invalid source dates', () => {
+        it('should insert blank target if source date is invalid and target does not exist', () => {
             const lines = ['Watched on start: invalid-date'];
             const result = FileProcessor.procesDatePair(
                 lines,
@@ -154,7 +198,9 @@ Watched on start: 2025/09/30
                 'YYYY/MM/DD'
             );
 
-            expect(result.needsUpdate).toBe(false);
+            expect(result.needsUpdate).toBe(true);
+            expect(result.action).toBe('insert');
+            expect(result.newValue).toBe('Shamsi start:');
         });
     });
 });

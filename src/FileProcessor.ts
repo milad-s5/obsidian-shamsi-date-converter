@@ -36,7 +36,7 @@ export class FileProcessor {
 
         // Check if frontmatter has any relevant properties
         const hasRelevantProperty = settings.datePairs.some(pair =>
-            frontmatter.includes(`${pair.source}:`)
+            frontmatter.includes(`${pair.source}:`) || frontmatter.includes(`${pair.target}:`)
         );
 
         if (!hasRelevantProperty) {
@@ -66,10 +66,15 @@ export class FileProcessor {
             return null;
         }
 
-        // Apply updates in reverse order to maintain line indices
-        for (let i = updates.length - 1; i >= 0; i--) {
-            const update = updates[i];
-            if (update.action === 'update' && update.targetLine !== undefined && update.newValue) {
+        // Apply updates from bottom to top to maintain correct line indices
+        const sortedUpdates = updates.slice().sort((a, b) => {
+            const aIndex = a.action === 'insert' ? a.insertAfter ?? -1 : a.targetLine ?? -1;
+            const bIndex = b.action === 'insert' ? b.insertAfter ?? -1 : b.targetLine ?? -1;
+            return bIndex - aIndex;
+        });
+
+        for (const update of sortedUpdates) {
+            if (update.action === 'update' && update.targetLine !== undefined && update.newValue !== undefined) {
                 lines[update.targetLine] = update.newValue;
             } else if (update.action === 'insert' && update.insertAfter !== undefined && update.newValue) {
                 lines.splice(update.insertAfter + 1, 0, update.newValue);
@@ -110,8 +115,40 @@ export class FileProcessor {
             }
         }
 
-        if (!sourceDate || sourcePropertyLine === -1) {
+        const blankShamsiLine = `${targetProperty}:`;
+
+        if (sourcePropertyLine === -1) {
+            if (targetPropertyLine !== -1) {
+                if (lines[targetPropertyLine] !== blankShamsiLine) {
+                    return {
+                        needsUpdate: true,
+                        action: 'update',
+                        targetLine: targetPropertyLine,
+                        newValue: blankShamsiLine
+                    };
+                }
+            }
             return { needsUpdate: false };
+        }
+
+        if (!sourceDate) {
+            if (targetPropertyLine !== -1) {
+                if (lines[targetPropertyLine] !== blankShamsiLine) {
+                    return {
+                        needsUpdate: true,
+                        action: 'update',
+                        targetLine: targetPropertyLine,
+                        newValue: blankShamsiLine
+                    };
+                }
+                return { needsUpdate: false };
+            }
+            return {
+                needsUpdate: true,
+                action: 'insert',
+                insertAfter: sourcePropertyLine,
+                newValue: blankShamsiLine
+            };
         }
 
         // Convert Gregorian to Shamsi
