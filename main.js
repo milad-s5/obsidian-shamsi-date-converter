@@ -66,28 +66,29 @@ module.exports = class ShamsiDateConverterPlugin extends Plugin {
 
         const lines = frontmatter.split('\n');
         let needsUpdate = false;
-        const updates = [];
 
         for (const pair of this.settings.datePairs) {
             const result = this.procesDatePair(lines, pair.source, pair.target);
-            if (result.needsUpdate) {
-                needsUpdate = true;
-                updates.push(result);
+            if (!result.needsUpdate) continue;
+
+            needsUpdate = true;
+
+            // Apply immediately: an insert shifts every later line index, so the
+            // next pair has to be resolved against the already-updated lines.
+            if (result.action === 'update') {
+                lines[result.targetLine] = result.newValue;
+            } else if (result.action === 'insert') {
+                lines.splice(result.insertAfter + 1, 0, result.newValue);
             }
         }
 
         if (needsUpdate) {
-            for (const update of updates) {
-                if (update.action === 'update') {
-                    lines[update.targetLine] = update.newValue;
-                } else if (update.action === 'insert') {
-                    lines.splice(update.insertAfter + 1, 0, update.newValue);
-                }
-            }
-
             const newFrontmatter = lines.join('\n');
-            const newContent = content.replace(frontmatterRegex, `---\n${newFrontmatter}\n---`);
-            
+            // Splice the string manually instead of using String.replace: a replacement
+            // string containing "$" (e.g. `boxOffice: $176,919,745`) would be read as a
+            // substitution pattern and inject the captured frontmatter back into itself.
+            const newContent = `---\n${newFrontmatter}\n---` + content.slice(match[0].length);
+
             await this.app.vault.modify(file, newContent);
         }
     }
