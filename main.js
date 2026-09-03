@@ -1,4 +1,6 @@
 const { Plugin, PluginSettingTab, Setting } = require('obsidian');
+const { RangeSetBuilder } = require('@codemirror/state');
+const { Decoration, ViewPlugin } = require('@codemirror/view');
 
 module.exports = class ShamsiDateConverterPlugin extends Plugin {
     async onload() {
@@ -6,6 +8,8 @@ module.exports = class ShamsiDateConverterPlugin extends Plugin {
         await this.loadSettings();
 
         this.addSettingTab(new ShamsiDateSettingTab(this.app, this));
+        this.registerEditorExtension(this.createEditorExtension());
+        document.body.classList.toggle('shamsi-date-converter-enabled', this.settings.showShamsiDates);
         this.registerMarkdownPostProcessor((element) => {
             if (this.settings.showShamsiDates) {
                 this.addRenderedShamsiDates(element);
@@ -43,6 +47,56 @@ module.exports = class ShamsiDateConverterPlugin extends Plugin {
 
     async saveSettings() {
         await this.saveData(this.settings);
+    }
+
+    createEditorExtension() {
+        const plugin = this;
+        return ViewPlugin.fromClass(class {
+            constructor(view) {
+                this.decorations = this.buildDecorations(view);
+            }
+
+            update(update) {
+                if (update.docChanged || update.viewportChanged) {
+                    this.decorations = this.buildDecorations(update.view);
+                }
+            }
+
+            buildDecorations(view) {
+                const builder = new RangeSetBuilder();
+                const markdownView = view.dom.closest('.markdown-source-view');
+                if (!markdownView?.classList.contains('is-live-preview')) {
+                    return builder.finish();
+                }
+
+                const datePattern = /(?<!\d)(\d{4})[-\/](\d{2})[-\/](\d{2})(?!\d)/g;
+                const text = view.state.doc.toString();
+                let match;
+
+                while ((match = datePattern.exec(text))) {
+                    const year = Number(match[1]);
+                    const month = Number(match[2]);
+                    const day = Number(match[3]);
+                    const date = new Date(year, month - 1, day, 12, 0, 0);
+
+                    if (date.getFullYear() !== year || date.getMonth() !== month - 1 || date.getDate() !== day) {
+                        continue;
+                    }
+
+                    const shamsi = plugin.formatShamsiDate(plugin.gregorianToShamsi(date));
+                    builder.add(
+                        match.index,
+                        match.index + match[0].length,
+                        Decoration.mark({
+                            class: 'cm-shamsi-date-converter-display',
+                            attributes: { 'data-shamsi': ` (${shamsi})` }
+                        })
+                    );
+                }
+
+                return builder.finish();
+            }
+        }, { decorations: (value) => value.decorations });
     }
 
     addRenderedShamsiDates(element) {
@@ -277,6 +331,7 @@ module.exports = class ShamsiDateConverterPlugin extends Plugin {
     }
 
     onunload() {
+        document.body.classList.remove('shamsi-date-converter-enabled');
         console.log('Unloading Shamsi Date Converter Plugin');
     }
 };
@@ -311,6 +366,7 @@ class ShamsiDateSettingTab extends PluginSettingTab {
                 .onChange(async (value) => {
                     this.plugin.settings.showShamsiDates = value;
                     await this.plugin.saveSettings();
+                    document.body.classList.toggle('shamsi-date-converter-enabled', value);
                     this.plugin.refreshMarkdownViews();
                 }));
 

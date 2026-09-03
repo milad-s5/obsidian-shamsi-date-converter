@@ -12,3 +12,11 @@
     font-size: 0.9em;
     white-space: nowrap;
 }
+
+.shamsi-date-converter-enabled .cm-shamsi-date-converter-display::after {
+    color: var(--text-muted);
+    content: attr(data-shamsi);
+    font-size: 0.9em;
+    margin-inline-start: 0.25em;
+    white-space: nowrap;
+}
