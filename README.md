@@ -14,6 +14,7 @@ Automatically convert Gregorian dates to Shamsi (Jalali/Persian) dates in your O
 - **🎯 Manual Conversion**: Command palette option to convert current file
 - **📅 Flexible Date Formats**: Support for various Gregorian date formats
 - **🎨 Configurable Output**: Choose your preferred Shamsi date format
+- **👁️ Rendered Date Display**: Optionally show the Shamsi date beside ISO Gregorian dates in Reading view without changing the note
 
 ## Installation
 
@@ -76,6 +77,17 @@ Access settings via Settings → Shamsi Date Converter:
 ### Basic Settings
 - **Auto-convert**: Enable/disable automatic conversion on file modification
 - **Date format**: Output format for Shamsi dates (YYYY/MM/DD, YYYY-MM-DD, etc.)
+- **Show Shamsi dates beside Gregorian dates**: When enabled, displays the Shamsi equivalent beside dates such as `2026-09-01` in Reading view. This is disabled by default and does not write anything to the note.
+
+### Rendered Date Display
+
+Enable **Show Shamsi dates beside Gregorian dates** in the plugin settings to see dates like this in Reading view:
+
+```text
+2026-09-01 (1405/06/10)
+```
+
+The original Markdown remains unchanged. The display supports ISO dates with either `-` or `/` separators and skips dates inside code blocks. Live Preview and source mode are not modified.
 
 ### Date Pair Mappings
 

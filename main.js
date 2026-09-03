@@ -6,7 +6,11 @@ module.exports = class ShamsiDateConverterPlugin extends Plugin {
         await this.loadSettings();
 
         this.addSettingTab(new ShamsiDateSettingTab(this.app, this));
-
+        this.registerMarkdownPostProcessor((element) => {
+            if (this.settings.showShamsiDates) {
+                this.addRenderedShamsiDates(element);
+            }
+        });
         this.registerEvent(
             this.app.vault.on('modify', (file) => {
                 this.handleFileModify(file);
@@ -32,7 +36,8 @@ module.exports = class ShamsiDateConverterPlugin extends Plugin {
                 { source: 'Watched on start', target: 'Shamsi start' },
                 { source: 'Watched on end', target: 'Shamsi end' }
             ],
-            dateFormat: 'YYYY/MM/DD'
+            dateFormat: 'YYYY/MM/DD',
+            showShamsiDates: false
         }, await this.loadData());
     }
 
@@ -40,6 +45,63 @@ module.exports = class ShamsiDateConverterPlugin extends Plugin {
         await this.saveData(this.settings);
     }
 
+    addRenderedShamsiDates(element) {
+        const datePattern = /(?<!\d)(\d{4})[-\/](\d{2})[-\/](\d{2})(?!\d)/g;
+        const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT);
+        const textNodes = [];
+        let currentNode;
+
+        while ((currentNode = walker.nextNode())) {
+            const parent = currentNode.parentElement;
+            if (parent && !parent.closest('code, pre, .shamsi-date-converter-display')) {
+                textNodes.push(currentNode);
+            }
+        }
+
+        for (const textNode of textNodes) {
+            datePattern.lastIndex = 0;
+            const text = textNode.nodeValue;
+            let match;
+            let lastIndex = 0;
+            let hasDate = false;
+            const fragment = document.createDocumentFragment();
+
+            while ((match = datePattern.exec(text))) {
+                const year = Number(match[1]);
+                const month = Number(match[2]);
+                const day = Number(match[3]);
+                const date = new Date(year, month - 1, day, 12, 0, 0);
+
+                if (date.getFullYear() !== year || date.getMonth() !== month - 1 || date.getDate() !== day) {
+                    continue;
+                }
+
+                hasDate = true;
+                fragment.appendChild(document.createTextNode(text.slice(lastIndex, match.index)));
+                fragment.appendChild(document.createTextNode(match[0]));
+
+                const shamsi = document.createElement('span');
+                shamsi.className = 'shamsi-date-converter-display';
+                shamsi.textContent = ` (${this.formatShamsiDate(this.gregorianToShamsi(date))})`;
+                shamsi.setAttribute('aria-label', 'Shamsi date');
+                fragment.appendChild(shamsi);
+                lastIndex = datePattern.lastIndex;
+            }
+
+            if (hasDate) {
+                fragment.appendChild(document.createTextNode(text.slice(lastIndex)));
+                textNode.replaceWith(fragment);
+            }
+        }
+    }
+
+    refreshMarkdownViews() {
+        this.app.workspace.iterateAllLeaves((leaf) => {
+            if (leaf.view.getViewType() === 'markdown') {
+                leaf.view.previewMode?.rerender(true);
+            }
+        });
+    }
     async handleFileModify(file) {
         if (!this.settings.autoConvert) return;
         if (!file || file.extension !== 'md') return;
@@ -66,7 +128,6 @@ module.exports = class ShamsiDateConverterPlugin extends Plugin {
 
         const lines = frontmatter.split('\n');
         let needsUpdate = false;
-
         for (const pair of this.settings.datePairs) {
             const result = this.procesDatePair(lines, pair.source, pair.target);
             if (!result.needsUpdate) continue;
@@ -88,7 +149,6 @@ module.exports = class ShamsiDateConverterPlugin extends Plugin {
             // string containing "$" (e.g. `boxOffice: $176,919,745`) would be read as a
             // substitution pattern and inject the captured frontmatter back into itself.
             const newContent = `---\n${newFrontmatter}\n---` + content.slice(match[0].length);
-
             await this.app.vault.modify(file, newContent);
         }
     }
@@ -241,6 +301,17 @@ class ShamsiDateSettingTab extends PluginSettingTab {
                 .onChange(async (value) => {
                     this.plugin.settings.autoConvert = value;
                     await this.plugin.saveSettings();
+                }));
+
+        new Setting(containerEl)
+            .setName('Show Shamsi dates beside Gregorian dates')
+            .setDesc('Display a Shamsi date next to YYYY-MM-DD dates in Reading view without changing the note')
+            .addToggle(toggle => toggle
+                .setValue(this.plugin.settings.showShamsiDates)
+                .onChange(async (value) => {
+                    this.plugin.settings.showShamsiDates = value;
+                    await this.plugin.saveSettings();
+                    this.plugin.refreshMarkdownViews();
                 }));
 
         new Setting(containerEl)

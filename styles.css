@@ -6,3 +6,9 @@
     color: var(--text-muted);
     font-size: 0.9em;
 }
+
+.shamsi-date-converter-display {
+    color: var(--text-muted);
+    font-size: 0.9em;
+    white-space: nowrap;
+}
